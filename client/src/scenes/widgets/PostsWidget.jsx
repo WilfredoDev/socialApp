@@ -7,7 +7,6 @@ const PostsWidget = ({ userId, isProfile = false }) => {
   const dispatch = useDispatch();
   const posts = useSelector((state) => state.posts);
   const token = useSelector((state) => state.token);
-  const userPicture = useSelector((state)=> state.user.picturePath);
 
   const getPosts = async () => {
     const response = await fetch(process.env.REACT_APP_API_URL, {
@@ -30,13 +29,22 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     dispatch(setPosts({ posts: data }));
   };
 
+  const getUserPicture = async (userId) => {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/users/${userId}`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const userData = await response.json();
+    return (userData.picturePath);
+  };
+
   useEffect(() => {
     if (isProfile) {
       getUserPosts();
     } else {
       getPosts();
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -51,8 +59,9 @@ const PostsWidget = ({ userId, isProfile = false }) => {
           picturePath,
           likes,
           comments,
-        }) => (
-          <PostWidget
+        }) => {
+          return(
+            <PostWidget
             key={_id}
             postId={_id}
             postUserId={userId}
@@ -60,11 +69,11 @@ const PostsWidget = ({ userId, isProfile = false }) => {
             description={description}
             location={location}
             picturePath={picturePath}
-            userPicturePath={userPicture}
             likes={likes}
             comments={comments}
           />
-        )
+          )
+        }
       )}
     </>
   );
