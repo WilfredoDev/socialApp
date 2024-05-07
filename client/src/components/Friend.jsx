@@ -21,9 +21,23 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
 
   const isFriend = friends.find((friend) => friend._id === friendId);
 
-  const patchFriend = async () => {
+  const addFriend = async () => {
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/users/${_id}/${friendId}`,
+      `${process.env.REACT_APP_API_URL}/users/${_id}/${friendId}/add`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+    dispatch(setFriends({ friends: data }));
+  };
+  const removeFriend = async () => {
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/users/${_id}/${friendId}/remove`,
       {
         method: "PATCH",
         headers: {
@@ -65,7 +79,13 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
         </Box>
       </FlexBetween>
       <IconButton
-        onClick={() => patchFriend()}
+        onClick={() => {
+          if (isFriend) {
+            removeFriend();
+          } else {
+            addFriend();
+          }
+        }}
         sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
       >
         {isFriend ? (

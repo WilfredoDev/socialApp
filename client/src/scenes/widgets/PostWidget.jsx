@@ -8,9 +8,11 @@ import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
+
+
 
 const PostWidget = ({
   postId,
@@ -19,7 +21,6 @@ const PostWidget = ({
   description,
   location,
   picturePath,
-  userPicturePath,
   likes,
   comments,
 }) => {
@@ -29,6 +30,21 @@ const PostWidget = ({
   const loggedInUserId = useSelector((state) => state.user._id);
   const isLiked = Boolean(likes[loggedInUserId]);
   const likeCount = Object.keys(likes).length;
+  const [photoPath, setPhotoPath] =  useState('');
+
+  const getUserPicture = async (userId) => {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/users/${userId}`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await response.json();
+    setPhotoPath(data.picturePath);
+  };
+  
+  useEffect(()=>{
+    getUserPicture(postUserId);
+  },[])
+  
 
   const { palette } = useTheme();
   const main = palette.neutral.main;
@@ -46,6 +62,7 @@ const PostWidget = ({
     const updatedPost = await response.json();
     dispatch(setPost({ post: updatedPost }));
   };
+  
 
   return (
     <WidgetWrapper m="2rem 0">
@@ -53,7 +70,7 @@ const PostWidget = ({
         friendId={postUserId}
         name={name}
         subtitle={location}
-        userPicturePath={userPicturePath}
+        userPicturePath={photoPath}
       />
       <Typography color={main} sx={{ mt: "1rem" }}>
         {description}
